@@ -21,7 +21,7 @@ logging.getLogger("openai").setLevel(logging.ERROR)
 logging.getLogger("httpx").setLevel(logging.ERROR)
 nest_asyncio.apply()
 
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_API_KEY = "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"#os.getenv('OPENAI_API_KEY')
 logger = logging.getLogger(__name__)
 if not logger.handlers:
     logger.setLevel(logging.INFO)
