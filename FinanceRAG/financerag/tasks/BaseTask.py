@@ -230,36 +230,36 @@ class BaseTask:
         for q_id, query in tqdm(self.queries.items(), desc="Hybrid search", total=len(self.queries)):
             if (query_ids is not None) and (q_id not in query_ids): # only process the queries in query_ids
                 continue
+            '''
+            # step 1: first try full text search with keywords
+            try:
+                keywords = self.keyword_extraction_expansion(query)
+                query_kw = "; ".join(keywords)
+                retrieved_docs_1 = (self.hybrid_retriever
+                                    .search(query=query_kw, query_type='fts')
+                                    .rerank(reranker=self.reranker)
+                                    .limit(top_k)
+                                    .to_pandas()
+                )
+            except Exception as e:
+                #retrieved_docs_1 = self.hybrid_retriever.search(query=query_kw, query_type='fts').limit(top_k).to_pandas()
+                retrieved_docs_1 = pandas.DataFrame()
+            _ = self._rename_score_column(retrieved_docs_1, "score")
             
-            # # step 1: first try full text search with keywords
-            # try:
-            #     keywords = self.keyword_extraction_expansion(query)
-            #     query_kw = "; ".join(keywords)
-            #     retrieved_docs_1 = (self.hybrid_retriever
-            #                         .search(query=query_kw, query_type='fts')
-            #                         .rerank(reranker=self.reranker)
-            #                         .limit(top_k)
-            #                         .to_pandas()
-            #     )
-            # except Exception as e:
-            #     #retrieved_docs_1 = self.hybrid_retriever.search(query=query_kw, query_type='fts').limit(top_k).to_pandas()
-            #     retrieved_docs_1 = pandas.DataFrame()
-            # _ = self._rename_score_column(retrieved_docs_1, "score")
             
-            
-            # # the intersection of retrieved_docs_1 and retrieved_docs_2
-            # if len(retrieved_docs_1) > 0:
+            # the intersection of retrieved_docs_1 and retrieved_docs_2
+            if len(retrieved_docs_1) > 0:
           
-            #     retrieved_docs = pandas.concat([retrieved_docs_1, retrieved_docs_2], ignore_index=True)
-            #     #retrieved_docs = pandas.DataFrame(columns=['doc_id', 'score1','score2','score'])
-            #     #filtered_doc_ids = set(retrieved_docs_1['doc_id']).intersection(set(retrieved_docs_2['doc_id']))
-            #     #retrieved_docs['doc_id'] = list(filtered_doc_ids)
-            #     #retrieved_docs['score1'] = retrieved_docs.doc_id.apply(lambda x: retrieved_docs_1[retrieved_docs_1['doc_id']==x]['score'].values[0])
-            #     #retrieved_docs['score2'] = retrieved_docs.doc_id.apply(lambda x: retrieved_docs_2[retrieved_docs_2['doc_id']==x]['score'].values[0])
-            #     #retrieved_docs['score'] = alpha*retrieved_docs['score1'] + (1-alpha)*retrieved_docs['score2']
-            # else:
-            #     retrieved_docs = retrieved_docs_2.rename(columns={'doc_id': 'doc_id', 'score': 'score'})
-            
+                retrieved_docs = pandas.concat([retrieved_docs_1, retrieved_docs_2], ignore_index=True)
+                #retrieved_docs = pandas.DataFrame(columns=['doc_id', 'score1','score2','score'])
+                #filtered_doc_ids = set(retrieved_docs_1['doc_id']).intersection(set(retrieved_docs_2['doc_id']))
+                #retrieved_docs['doc_id'] = list(filtered_doc_ids)
+                #retrieved_docs['score1'] = retrieved_docs.doc_id.apply(lambda x: retrieved_docs_1[retrieved_docs_1['doc_id']==x]['score'].values[0])
+                #retrieved_docs['score2'] = retrieved_docs.doc_id.apply(lambda x: retrieved_docs_2[retrieved_docs_2['doc_id']==x]['score'].values[0])
+                #retrieved_docs['score'] = alpha*retrieved_docs['score1'] + (1-alpha)*retrieved_docs['score2']
+            else:
+                retrieved_docs = retrieved_docs_2.rename(columns={'doc_id': 'doc_id', 'score': 'score'})
+            '''
             # step 2 hybrid search with original query after filtering out the docs that failed in step 1
             try:
                 retrieved_docs = (self.hybrid_retriever
